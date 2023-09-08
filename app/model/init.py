@@ -2,6 +2,8 @@ import torch
 from transformers import AutoTokenizer, AutoModelWithLMHead
 
 
+# Класс блягодаря которому, происходит взаимодействие телеграмм бота с нейронной сеть.
+
 
 class NeiroDialogBot:
 
@@ -9,12 +11,14 @@ class NeiroDialogBot:
         self.tokenizer = AutoTokenizer.from_pretrained('app/model/save-model/tinkoff')
         self.model = AutoModelWithLMHead.from_pretrained('app/model/save-model/tinkoff')
         self.chat = ''
-        self.idLastMessage = 0
 
-    def replyToTheMessage(self,message):
+    def replyToTheMessage(self, message: str) -> str:
+        """
+        На вход поступает сообщение от собесдника. В дальнейшем идёт обработка сообщений у нейронной сети, потом полученные данные от нейронной сети
+        обрабатываются и обратно отправляются телеграм боту.
+        """
         
         self.chat += f'@@ПЕРВЫЙ@@{message}@@ВТОРОЙ@@'
-        self.idLastMessage = len(self.chat)-1
         inputs = self.tokenizer(f'{self.chat}', return_tensors='pt')
         generated_token_ids = self.model.generate(
             **inputs,
@@ -41,7 +45,10 @@ class NeiroDialogBot:
 
         return context_with_response
 
-    def clearContext(self,context, id):
+    def clearContext(self, context: str, id: int) -> str:
+        """
+        На вход идут два параментра. Первый это контекст, который отдала нейронка и который нужно подать собеседнику в правильном виде. А второй параметр - это index(id) места с которого начинается  работа со строкой, чтобы забрать из неё только нужное. На выходе строка.
+        """
         string = ''
         id+=1
         while id < len(context) and context[id] != '@':
@@ -49,16 +56,20 @@ class NeiroDialogBot:
             id+=1
         return string
     
-    def findLastIdMessage(self,context):
+    def findLastIdMessage(self, context: str) -> int:
+        """
+        Поиск последнего index(id) в context. На вход принимается context(котекст, который сгенерировала нейронка). На выходе id(int), с какого места в дальнейшем начинать обработку контекста.
+        """
         id = context.rfind('@@ВТОРОЙ@@')
         return id+9
         
 
     
     def restartBot(self):
+        """
+        Перезапуск бота, то есть его обнуление.
+        """
         self.chat = ''
-        self.idLastMessage = 0
-        self.chat
 
 
 
